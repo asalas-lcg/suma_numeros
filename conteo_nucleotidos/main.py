@@ -6,6 +6,9 @@ secuencia = secuencia.upper()
 print("Secuencia ingresada:", secuencia)
 
 # 3. Validar si está vacía
+if not secuencia:
+    print("La secuencia está vacía. Por favor, ingrese una secuencia válida.")
+    exit()
 # 4. Validar caracteres
 # 5. Contar nucleótidos
 count_a = secuencia.count("A")
