@@ -1,0 +1,13 @@
+[project]
+name = "suma_numeros"
+version = "0.1.0"
+description = "Suma numeros enteros o flotantes"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "conteo_nucleotidos",
+]
+
