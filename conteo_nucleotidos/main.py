@@ -1,22 +1,46 @@
 # 1. Leer secuencia
-secuencia = input("Ingrese la secuencia de AND: ")
 
-# 2. Convertir a mayúsculas
+print("Introduce una secuencia de DNA (solo A, T, C, G):")
+secuencia = input()
 secuencia = secuencia.upper()
-print("Secuencia ingresada:", secuencia)
 
-# 3. Validar si está vacía
-if not secuencia:
-    print("La secuencia está vacía. Por favor, ingrese una secuencia válida.")
+# Validar si la secuencia está vacía
+if secuencia == "":
+    print("Error: secuencia vacía")
     exit()
-# 4. Validar caracteres
-# 5. Contar nucleótidos
-count_a = secuencia.count("A")
-count_t = secuencia.count("T")
-count_c = secuencia.count("C")
-count_g = secuencia.count("G")
-print("Número de adeninas (A):", count_a)
-print("Número de timinas (T):", count_t)
-print("Número de citosinas (C):", count_c)
-print("Número de guaninas (G):", count_g)
-# 6. Mostrar resultados
+
+# Validar caracteres
+es_valida = True
+for caracter in secuencia:
+    if caracter not in "ATCG":
+        es_valida = False
+
+if not es_valida:
+    print("Error: caracteres inválidos")
+    exit()
+
+# Inicializar contadores
+count_a = 0
+count_t = 0
+count_c = 0
+count_g = 0
+
+# Contar nucleótidos
+for caracter in secuencia:
+    if caracter == "A":
+        count_a += 1
+    if caracter == "T":
+        count_t += 1
+    if caracter == "C":
+        count_c += 1
+    if caracter == "G":
+        count_g += 1
+
+total = count_a + count_t + count_c + count_g
+
+print("Nucleotide count:")
+print("A:", count_a)
+print("T:", count_t)
+print("C:", count_c)
+print("G:", count_g)
+print("Total:", total)
