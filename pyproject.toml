@@ -9,5 +9,6 @@ dependencies = []
 [tool.uv.workspace]
 members = [
     "conteo_nucleotidos",
+    "kmer_project",
 ]
 
