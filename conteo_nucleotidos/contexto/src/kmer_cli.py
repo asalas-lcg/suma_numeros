@@ -2,7 +2,9 @@
 import argparse
 import sys
 
-parser = argparse.ArgumentParser(description="Generate k-mers from a DNA sequence")
+parser = argparse.ArgumentParser(
+    description="Generate k-mers from a DNA sequence (A,T,G,C,N allowed)"
+)
 parser.add_argument("--sequence", type=str, required=True)
 parser.add_argument("--k", type=int, required=True)
 
@@ -10,7 +12,7 @@ args = parser.parse_args()
 sequence = args.sequence.upper()
 k = args.k
 
-valid = {"A","T","G","C"}
+valid = {"A","T","G","C","N"}
 
 if len(sequence) == 0:
     print("Error: sequence is empty")
