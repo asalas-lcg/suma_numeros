@@ -10,5 +10,6 @@ dependencies = []
 members = [
     "conteo_nucleotidos",
     "kmer_project",
+    "regulon_summary",
 ]
 
