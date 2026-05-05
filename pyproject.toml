@@ -11,5 +11,6 @@ members = [
     "conteo_nucleotidos",
     "kmer_project",
     "regulon_summary",
+    "regulon_summary/data/raw",
 ]
 
