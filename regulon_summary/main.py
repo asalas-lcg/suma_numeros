@@ -1,92 +1,157 @@
-# Programa regulon_summary que por cada TF obtiene
-# TF Total de genes regulados Lista de genes
-# AraC 2 araA, araB
+# Leer el archivo de entrada
+# Contar # genes activados y reprimidos para cada TF
+# Generar archivo de salida
+# Calcular si un TF es activador o represor o dual
 
-# Algoritmo:
-# 1. Leer el archivo de texto y almacenar su contenido en una variable.
-# 2. Crear una estructura para akmacenar la información de cada TF.
-# 3. Leer la información de ese TF
-
-interactions = [
-    ('AraC', 'araA', '+'),
-    ('AraC', 'araB', '-'),
-    ('LacI', 'lacZ', '-'),
-    ('CRP', 'lacZ', '+'),
-    ('CRP', 'araA', '+')
-]
-
-# creamos la estructura para almacenar la información de cada TF, en este caso un diccionario donde la clave es el nombre del TF y el valor es una lista de genes regulados por ese TF. Por ejemplo:
-# "AraC" --> ["aracC", "araB"]
-
-"AraC"--> "genes" --> ["araA", "araB"]
-"AraC" --> "activados" --> 1
-"AraC" --> "reprimidos" --> 1
-
-regulon = {} # diccionario con lista de genes
-for tf, gene, effect in interactions:
-    if tf not in regulon:
-        regulon[tf] = {"genes":[],
-                          "activados":0,
-                          "reprimidos":0
-        }
-    regulon[tf]["genes"].append(gene)
-    
+# Refactorizar el código para que sea más legible y eficiente
 
 
-# imprimirmos el resumen de cada TF
-print("TF\tTotal de genes regulados\tLista de genes")
-
-for tf in sorted(regulon):
-    total_genes = len(regulon[tf]["genes"])
-    lista_genes = ", ".join(regulon[tf]["genes"])
-    print(f"{tf}\t{total_genes}\t{lista_genes}")
-    
+import os
 
 
+# =========================================
+# Lectura del archivo y construcción de interactions
+# =========================================
+# =========================================
+# Responsabilidad: leer interacciones desde archivo
+# Entrada: archivo
+# Salida: lista de interactions
+# =========================================
+def load_interactions(filename):
+    interactions = []
+    if not os.path.exists(filename):
+        print("Error: archivo no encontrado")
+        exit(1)
+    else:
+        with open(filename) as f:
+            for line in f:
+                line = line.strip()
 
-interactions = []
+                # Ignorar líneas vacías
+                if not line:
+                    continue
 
-filename = "data/raw/NetworkRegulatorGene.tsv"
+                # Ignorar comentarios
+                if line.startswith("#"):
+                    continue
 
-if not os.path.exists(filename):
-    print("Error: archivo no encontrado")
-    exit(1)
-else:
-    with open(filename) as f:
+                # Ignorar encabezado
+                if line.startswith("1)regulatorId"):
+                    continue
 
-        for line in f:
+                fields = line.split("\t")
 
-            line = line.strip()
+                # Validar número mínimo de columnas
+                if len(fields) <= 6:
+                    continue
 
-            print(f"Leído: {line[:50]}...")
+                # columnas a utilizar
+                TF = fields[1]
+                gene = fields[4]
+                effect = fields[5]
 
-            # Ignorar líneas vacías
-            if not line:
-                continue
+                # Validar effect
+                if effect not in ["+", "-", "-+"]:
+                    continue
 
-            # Ignorar comentarios
-            if line.startswith("#"):
-                continue
+                interactions.append((TF, gene, effect))
+    return interactions
 
-            # Ignorar encabezado
-            if line.startswith("1)regulatorId"):
-                continue
 
-            fields = line.split("\t")
+filename = "data/NetworkRegulatorGene.tsv"
+interactions = load_interactions(filename)
 
-            # Validar número mínimo de columnas
-            if len(fields) <= 6:
-                continue
 
-              # columnas a utilizar
-            TF = fields[1]
-            gene = fields[3]
-            effect = fields[5]
+# =========================================
+# Generación de la salida
+# imprimir en un archivo el resumen de cada TF
+# =========================================
+# Responsabilidad: generar un diccionario con información de cada TF (genes regulados, activados, reprimidos)
+# Entrada: lista de interactions
+# Salida: diccionario con información de cada TF (genes regulados, activados, reprimidos)
+# ======
+def build_regulon(interactions):
+    regulon = {}  # diccionario con lista de genes
+    for tf, gene, effect in interactions:
+        if tf not in regulon:
+            regulon[tf] = {"genes": [], "activados": 0, "reprimidos": 0}
+        regulon[tf]["genes"].append(gene)
 
-            # Validar effect
-            if effect not in ["+", "-"]:
-                continue
+        # Contar activados y reprimidos
+        if effect == "+":
+            regulon[tf]["activados"] += 1
+        elif effect == "-":
+            regulon[tf]["reprimidos"] += 1
+        elif effect == "-+":
+            regulon[tf]["activados"] += 1
+            regulon[tf]["reprimidos"] += 1
+    return regulon
 
-            interactions.append((TF, gene, effect))
 
-print(interactions)
+regulon = build_regulon(interactions)
+
+# "AraC" {
+#    "genes": [araC, araA, araB, araD],
+#    "activados": 4,
+#    "reprimidos": 0
+# }
+
+
+# =========================================
+# Generación de la salida
+# imprimir en un archivo el resumen de cada TF
+# =========================================
+# =========================================
+# Responsabilidad: generar un archivo con resumen de cada TF (total genes regulados, activados, reprimidos, tipo de TF, lista de genes)
+# Entrada: diccionario con información de cada TF
+# Salida: archivo con resumen de cada TF (total genes regulados, activados, reprimidos, tipo de TF, lista de genes)
+# =========================================
+def get_tf_type(activados, reprimidos):
+    if activados > 0 and reprimidos == 0:
+        return "Activador"
+    elif activados == 0 and reprimidos > 0:
+        return "Represor"
+    elif activados > 0 and reprimidos > 0:
+        return "Dual"
+    else:
+        return "Desconocido"
+
+
+output_filename = "regulon_summary.tsv"
+with open(output_filename, "w") as f:
+    f.write(
+        "TF\tTotal de genes regulados\tActivados\tReprimidos\tTipo TF\tLista de genes"
+    )
+    for tf in sorted(regulon):
+        total_genes = len(regulon[tf]["genes"])
+        lista_genes = ",".join(regulon[tf]["genes"])
+        activados = regulon[tf]["activados"]
+        reprimidos = regulon[tf]["reprimidos"]
+
+        # Determinar del TF es activador, represor o dual
+        if activados > 0 and reprimidos == 0:
+            tipo_tf = "Activador"
+        elif activados == 0 and reprimidos > 0:
+            tipo_tf = "Represor"
+        elif activados > 0 and reprimidos > 0:
+            tipo_tf = "Dual"
+
+        f.write(
+            f"{tf}\t{total_genes}\t{activados}\t{reprimidos}\t{tipo_tf}\t{lista_genes}\n"
+        )
+print(f"Archivo de salida generado: {output_filename}")
+
+
+# =========================================
+# main
+# =========================================
+def main():
+    # Cargar interacciones del archivo TSV
+    filename = "data/NetworkRegulatorGene.tsv"
+    interactions = load_interactions(filename)
+
+    regulon = build_regulon(interactions)
+
+    output_filename = "regulon_summary.tsv"
+    write_summary(regulon, output_filename)
+    print(f"Archivo de salida generado: {output_filename}")
